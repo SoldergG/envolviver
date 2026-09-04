@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { THEME_KEY, type Theme } from "@/lib/theme";
+import { useSyncExternalStore } from "react";
+import type { Theme } from "@/lib/theme";
+import {
+  getServerSnapshot, getSnapshot, setTheme, subscribe,
+} from "@/lib/theme-store";
 
 const OPTIONS: { id: Theme; label: string; icon: React.ReactNode }[] = [
   {
@@ -42,36 +45,9 @@ const OPTIONS: { id: Theme; label: string; icon: React.ReactNode }[] = [
  * Um interruptor de dois estados não deixaria voltar a seguir o sistema.
  */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("system");
-  const [ready, setReady] = useState(false);
-
-  // Só depois de montar é que sabemos o que está no localStorage —
-  // pintar o estado ativo no servidor daria erro de hidratação.
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved === "light" || saved === "dark") setTheme(saved);
-    } catch {
-      /* localStorage bloqueado — fica em "sistema" */
-    }
-    setReady(true);
-  }, []);
-
-  function choose(next: Theme) {
-    setTheme(next);
-    const root = document.documentElement;
-    if (next === "system") {
-      root.removeAttribute("data-theme");
-    } else {
-      root.setAttribute("data-theme", next);
-    }
-    try {
-      if (next === "system") localStorage.removeItem(THEME_KEY);
-      else localStorage.setItem(THEME_KEY, next);
-    } catch {
-      /* sem persistência, mas a escolha vale para esta sessão */
-    }
-  }
+  // No servidor devolve sempre "system", por isso a hidratação bate certo;
+  // no cliente lê o localStorage e volta a pintar com a escolha real.
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   return (
     <div
@@ -80,14 +56,14 @@ export function ThemeToggle() {
       className="inline-flex rounded-full border rule p-0.5"
     >
       {OPTIONS.map((o) => {
-        const active = ready && theme === o.id;
+        const active = theme === o.id;
         return (
           <button
             key={o.id}
             type="button"
             role="radio"
             aria-checked={active}
-            onClick={() => choose(o.id)}
+            onClick={() => setTheme(o.id)}
             title={o.label}
             className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[0.8125rem] transition-colors"
             style={
