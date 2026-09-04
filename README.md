@@ -1,5 +1,7 @@
 # Envolviver — versão redesenhada
 
+**Em produção:** https://envolviver.vercel.app · **Repo:** https://github.com/SoldergG/envolviver
+
 Reconstrução de [envolviver.pt](https://envolviver.pt) com linguagem visual Apple,
 seguindo os princípios das Human Interface Guidelines adaptados a web.
 
@@ -14,8 +16,30 @@ npm start
 
 ## Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · zero dependências extra.
-Tudo estático — sem base de dados, sem API.
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4
+· Vercel Blob (conteúdo e imagens) · Clerk (login do painel).
+
+## Painel de administração — `/admin`
+
+Edita textos e imagens do site sem tocar em código.
+
+O conteúdo original vive em `lib/content.ts` e serve de base. O painel grava
+um documento JSON no Vercel Blob que sobrepõe o que foi editado — se o Blob
+falhar ou ainda não existir, o site serve os valores originais e nunca fica
+em branco. O botão "Repor tudo" apaga as edições e volta ao original.
+
+Oito separadores: Início, Serviços, AEC, CAF, A Envolviver, Férias, Notícias
+e Contactos. Cada um grava a sua secção. As imagens sobem direto para o Blob
+(JPEG, PNG, WebP, AVIF ou GIF, até 8 MB) e a página revalida na hora.
+
+### Segurança
+
+`/admin` e `/api/admin` exigem sessão Clerk, verificada no `proxy.ts` **e**
+outra vez nas server actions — o middleware sozinho não chega.
+
+Sem as chaves do Clerk, o painel **fecha-se**: mostra o que falta configurar
+e recusa gravar (`503`). O `proxy.ts` deixa passar nesse estado para não
+derrubar o site público, já que o matcher cobre todas as rotas.
 
 ## Estrutura
 
@@ -90,13 +114,16 @@ liga depois de o `<script>` inline marcar `html.js`, por isso sem JS nada desapa
 
 ## O que falta ligar
 
-1. **Formulário de contactos** — compõe uma mensagem e abre o cliente de email.
+1. **Clerk** — o painel está fechado até os termos do Marketplace serem aceites
+   na conta Vercel. Depois: `vercel integration add clerk`, `vercel env pull`,
+   e novo deploy. As variáveis estão em `.env.example`.
+2. **Formulário de contactos** — compõe uma mensagem e abre o cliente de email.
    Funciona sem backend, mas para envio no servidor liga a um endpoint (Resend,
    Supabase). O original usava um CAPTCHA Telerik que não é reproduzível.
-2. **Imagens** — as fotos das atividades vêm do original a 290×208. São pequenas
+3. **Imagens** — as fotos das atividades vêm do original a 290×208. São pequenas
    para hero ou full-bleed; o layout mantém-nas em cartões contidos. Fotografia
    nova em alta resolução é a maior melhoria visual disponível.
-3. **Conteúdo desatualizado** — a última notícia é de fevereiro de 2022. As páginas
+4. **Conteúdo desatualizado** — a última notícia é de fevereiro de 2022. As páginas
    `/ferias-e-interrupcoes` e a antiga `/links` estavam vazias no original.
-4. **Área reservada** — aponta para `educa.espalhaideias.pt`, fora deste projeto.
-5. **OG image** — as tags Open Graph estão postas, falta a imagem.
+5. **Área reservada** — aponta para `educa.espalhaideias.pt`, fora deste projeto.
+6. **OG image** — as tags Open Graph estão postas, falta a imagem.
