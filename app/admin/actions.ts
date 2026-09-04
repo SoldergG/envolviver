@@ -4,9 +4,11 @@ import { auth } from "@clerk/nextjs/server";
 import { put } from "@vercel/blob";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { CONTENT_KEY, CONTENT_TAG, defaults, getSite, type SiteContent } from "@/lib/site";
+import { clerkConfigured } from "@/lib/auth-config";
 
 /** Toda a escrita passa por aqui — sem sessão Clerk, nada é gravado. */
 async function requireAdmin() {
+  if (!clerkConfigured) throw new Error("Autenticação não configurada.");
   const { userId } = await auth();
   if (!userId) throw new Error("Sem sessão. Entre em /admin/entrar.");
   return userId;

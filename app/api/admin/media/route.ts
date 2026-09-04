@@ -1,11 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
+import { clerkConfigured } from "@/lib/auth-config";
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"];
 
 export async function POST(request: Request) {
+  if (!clerkConfigured) {
+    return NextResponse.json({ error: "Autenticação não configurada." }, { status: 503 });
+  }
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Sem autorização." }, { status: 401 });
