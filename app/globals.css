@@ -66,16 +66,32 @@
     --veil: rgba(255, 255, 255, 0.72);
   }
 
+  /* Paleta escura, definida uma vez e aplicada em dois casos:
+     quando o sistema pede escuro e o visitante não escolheu claro,
+     e quando o visitante escolheu escuro explicitamente. */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --shell: #000000;
       --shell-2: #1d1d1f;
       --fg: #f5f5f7;
       --fg-2: #86868b;   /* cinza Apple para dark — passa 4.5:1 sobre preto */
       --rule: #38383a;
       --veil: rgba(22, 22, 23, 0.72);
+      color-scheme: dark;
     }
   }
+
+  :root[data-theme="dark"] {
+    --shell: #000000;
+    --shell-2: #1d1d1f;
+    --fg: #f5f5f7;
+    --fg-2: #86868b;
+    --rule: #38383a;
+    --veil: rgba(22, 22, 23, 0.72);
+    color-scheme: dark;
+  }
+
+  :root[data-theme="light"] { color-scheme: light; }
 
   html {
     scroll-behavior: smooth;
@@ -205,8 +221,9 @@
   /* Acento que troca de variante com o tema — ver lib/color.ts */
   .accent { background: var(--accent); }
   @media (prefers-color-scheme: dark) {
-    .accent { background: var(--accent-dark); }
+    :root:not([data-theme="light"]) .accent { background: var(--accent-dark); }
   }
+  :root[data-theme="dark"] .accent { background: var(--accent-dark); }
 }
 
 @layer utilities {

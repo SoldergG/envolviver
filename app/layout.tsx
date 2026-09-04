@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { themeScript } from "@/lib/theme";
 
 /* Inter serve de reserva para quem não está em Apple —
    nos dispositivos Apple o stack em globals.css usa SF Pro nativo. */
@@ -54,7 +55,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-PT" className={inter.variable}>
+    <html lang="pt-PT" className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* Antes da pintura: aplica o tema guardado e evita o flash. */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         {/* Corre antes da pintura — sem isto, o CSS deixa o conteúdo
             visível e a animação de entrada simplesmente não acontece. */}

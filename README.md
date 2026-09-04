@@ -100,7 +100,16 @@ Tailwind de propósito: à mão, o Lightning CSS descartava a versão sem prefix
 `prefers-reduced-motion`. O conteúdo está visível no HTML estático — a animação só
 liga depois de o `<script>` inline marcar `html.js`, por isso sem JS nada desaparece.
 
-**Tema escuro.** Automático, pelo `prefers-color-scheme`. Todos os tokens têm par.
+**Tema escuro.** Segue o sistema por omissão (`prefers-color-scheme`), e o
+rodapé tem um seletor de três estados — Sistema, Claro, Escuro — como no macOS.
+Um interruptor de dois estados não deixaria voltar a seguir o sistema.
+
+A escolha fica em `localStorage` e é aplicada por um script inline no `<head>`
+antes da pintura, para não haver flash do tema errado. Os tokens estão
+definidos três vezes: `:root` (claro), a media query com
+`:not([data-theme="light"])` (o sistema, quando não há escolha manual) e
+`[data-theme="dark"]` (a escolha manual). Também se declara `color-scheme`,
+para os controlos nativos do browser acompanharem.
 
 ## Acessibilidade
 

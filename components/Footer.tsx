@@ -2,6 +2,7 @@ import Link from "next/link";
 import { external } from "@/lib/content";
 import { getSite } from "@/lib/site";
 import { Ring } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 
 function buildColumns(aec: Awaited<ReturnType<typeof getSite>>["aec"], caf: Awaited<ReturnType<typeof getSite>>["caf"]) {
   return [
@@ -115,7 +116,19 @@ export async function Footer() {
           </div>
         </div>
 
-        <div className="muted mt-12 flex flex-col gap-4 border-t rule pt-8 text-[0.75rem] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 flex flex-col gap-6 border-t rule pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-[0.8125rem] font-semibold">Aspeto</h2>
+            <div className="mt-2">
+              <ThemeToggle />
+            </div>
+          </div>
+          <p className="muted text-[0.75rem] sm:text-right">
+            Por omissão segue o tema do seu sistema.
+          </p>
+        </div>
+
+        <div className="muted mt-10 flex flex-col gap-4 border-t rule pt-8 text-[0.75rem] sm:flex-row sm:items-center sm:justify-between">
           <span className="inline-flex items-center gap-2">
             <Ring size={16} />
             © {new Date().getFullYear()} Envolviver. Todos os direitos reservados.
