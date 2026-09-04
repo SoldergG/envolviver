@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Envolviver — versão redesenhada
 
-## Getting Started
+Reconstrução de [envolviver.pt](https://envolviver.pt) com linguagem visual Apple,
+seguindo os princípios das Human Interface Guidelines adaptados a web.
 
-First, run the development server:
+Conteúdo e assets extraídos do site original — a extração completa está em
+`~/Desktop/envolviver-site/`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # http://localhost:3000
+npm run build   # 26 páginas estáticas
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · zero dependências extra.
+Tudo estático — sem base de dados, sem API.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Estrutura
 
-## Learn More
+```
+app/
+├── layout.tsx                        nav + rodapé + metadata + OG
+├── page.tsx                          home
+├── a-envolviver/                     quem somos, objetivos, como fazemos
+├── enriquecimento-curricular/        AEC (índice + 5 atividades)
+├── apoio-a-familia/                  CAF (índice + 5 atividades)
+├── ferias-e-interrupcoes/            + PDFs para descarregar
+├── noticias/                         listagem + 4 artigos
+├── contactos/                        formulário + morada + mapa
+├── sitemap.ts · robots.ts · not-found.tsx
+└── globals.css                       ⭐ o design system inteiro
 
-To learn more about Next.js, take a look at the following resources:
+components/
+├── Nav.tsx              barra translúcida, menu móvel a full screen
+├── Footer.tsx           sitemap em 4 colunas
+├── Logo.tsx             o anel de 9 cores, agora em SVG
+├── Reveal.tsx           entrada ao scroll (progressive enhancement)
+├── ActivityCard.tsx · ActivityDetail.tsx · ProgrammePage.tsx
+├── ContactForm.tsx      formulário acessível, sem CAPTCHA
+└── Section.tsx · Arrow.tsx
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+lib/
+├── content.ts           ⭐ todo o texto do site, tipado
+└── color.ts             contraste WCAG + variantes de acento por tema
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Para editar textos, mexe só em `lib/content.ts`.
 
-## Deploy on Vercel
+## Decisões de design
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Tipografia.** SF Pro nativa nos dispositivos Apple (`-apple-system`), Inter como
+reserva. Corpo a 17px — o default da HIG, contra os 11px do original. Títulos com
+tracking apertado (-0.035em) e `clamp()` para escalarem sem media queries.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Cor.** O arco-íris de 9 cores da marca é a assinatura, mas entra contido: uma
+régua de 3px sob a navegação, uma cor por atividade, pontos de acento. O resto é
+a escala neutra da Apple (`#1d1d1f` / `#f5f5f7`).
+
+**Contraste.** O amarelo `#fcd805` e o lima `#c9cc2c` desaparecem sobre branco;
+o índigo `#6e7ca6` desaparece sobre preto. `lib/color.ts` escurece ou clareia cada
+acento até 3:1 contra o fundo do tema, mantendo a matiz. Os badges de serviço usam
+`onColor()` para escolher texto claro ou escuro pela luminância — todos passam AA.
+
+O vermelho `#e72a25` (4.42:1 com branco) e o índigo `#6e7ca6` (4.08:1 com preto)
+não chegam a 4.5:1 com nenhuma cor de texto. Por isso **nunca suportam texto** —
+só aparecem como pontos e barras decorativas, e a informação está sempre também
+no texto ao lado.
+
+**Materiais.** A navegação usa `backdrop-blur-xl` + `backdrop-saturate-150` sobre
+um véu a 72%, com fallback opaco via `@supports`. Escrito com os utilitários do
+Tailwind de propósito: à mão, o Lightning CSS descartava a versão sem prefixo.
+
+**Movimento.** Entrada ao scroll via IntersectionObserver. Respeita
+`prefers-reduced-motion`. O conteúdo está visível no HTML estático — a animação só
+liga depois de o `<script>` inline marcar `html.js`, por isso sem JS nada desaparece.
+
+**Tema escuro.** Automático, pelo `prefers-color-scheme`. Todos os tokens têm par.
+
+## Acessibilidade
+
+- `lang="pt-PT"` (o original dizia `en`)
+- Link "saltar para o conteúdo"
+- Hierarquia h1 → h2 → h3 correta em todas as páginas
+- Alvos de toque ≥44px, incluindo os links do rodapé em ecrãs pequenos
+- Foco visível com `:focus-visible`
+- Todas as imagens com `alt`; as decorativas com `aria-hidden`
+- Sem overflow horizontal em nenhuma largura
+
+## O que falta ligar
+
+1. **Formulário de contactos** — compõe uma mensagem e abre o cliente de email.
+   Funciona sem backend, mas para envio no servidor liga a um endpoint (Resend,
+   Supabase). O original usava um CAPTCHA Telerik que não é reproduzível.
+2. **Imagens** — as fotos das atividades vêm do original a 290×208. São pequenas
+   para hero ou full-bleed; o layout mantém-nas em cartões contidos. Fotografia
+   nova em alta resolução é a maior melhoria visual disponível.
+3. **Conteúdo desatualizado** — a última notícia é de fevereiro de 2022. As páginas
+   `/ferias-e-interrupcoes` e a antiga `/links` estavam vazias no original.
+4. **Área reservada** — aponta para `educa.espalhaideias.pt`, fora deste projeto.
+5. **OG image** — as tags Open Graph estão postas, falta a imagem.

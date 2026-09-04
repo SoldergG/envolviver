@@ -1,26 +1,228 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   Envolviver — sistema visual
+   Linguagem Apple HIG: tipografia grande e apertada, muito
+   espaço branco, cor contida, materiais translúcidos.
+   O arco-íris da marca entra como acento, nunca como fundo.
+   ============================================================ */
+
+@theme {
+  /* --- Arco-íris da marca (extraído de envolviver.pt) --- */
+  --color-brand-red: #e72a25;
+  --color-brand-orange: #f58221;
+  --color-brand-yellow: #fcd805;
+  --color-brand-lime: #c9cc2c;
+  --color-brand-green: #7abc5d;
+  --color-brand-teal: #13a89e;
+  --color-brand-sky: #93d7e9;
+  --color-brand-indigo: #6e7ca6;
+  --color-brand-magenta: #cd3293;
+
+  /* --- Neutros (escala Apple) --- */
+  --color-ink: #1d1d1f;
+  --color-ink-2: #6e6e73;
+  --color-hairline: #d2d2d7;
+  --color-canvas: #ffffff;
+  --color-canvas-2: #f5f5f7;
+
+  /* --- Tipografia: SF Pro nativo, Inter como reserva --- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --text-hero: clamp(2.75rem, 7vw, 5.5rem);
+  --text-hero--line-height: 1.04;
+  --text-hero--letter-spacing: -0.035em;
+  --text-hero--font-weight: 600;
+
+  --text-display: clamp(2rem, 4.6vw, 3.5rem);
+  --text-display--line-height: 1.07;
+  --text-display--letter-spacing: -0.028em;
+  --text-display--font-weight: 600;
+
+  --text-title: clamp(1.5rem, 2.6vw, 2.125rem);
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 600;
+
+  --text-lead: clamp(1.1875rem, 1.7vw, 1.5rem);
+  --text-lead--line-height: 1.45;
+  --text-lead--letter-spacing: -0.012em;
+
+  --text-body: 1.0625rem;      /* 17px — o default da HIG, não 11px */
+  --text-body--line-height: 1.6;
+
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* --- Tema escuro: inverte os papéis, mantém os acentos --- */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --shell: var(--color-canvas);
+    --shell-2: var(--color-canvas-2);
+    --fg: var(--color-ink);
+    --fg-2: var(--color-ink-2);
+    --rule: var(--color-hairline);
+    --veil: rgba(255, 255, 255, 0.72);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --shell: #000000;
+      --shell-2: #1d1d1f;
+      --fg: #f5f5f7;
+      --fg-2: #86868b;   /* cinza Apple para dark — passa 4.5:1 sobre preto */
+      --rule: #38383a;
+      --veil: rgba(22, 22, 23, 0.72);
+    }
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--shell);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+
+  /* Foco visível e consistente — requisito de acessibilidade */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-teal);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-brand-teal) 26%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Largura de leitura + margens seguras */
+  .shell {
+    width: 100%;
+    max-width: 1120px;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .shell { padding-inline: 2.5rem; }
+  }
+
+  .surface { background: var(--shell); }
+  .surface-2 { background: var(--shell-2); }
+  .rule { border-color: var(--rule); }
+  .muted { color: var(--fg-2); }
+
+  /* Material translúcido da barra de navegação (HIG — Materials).
+     O blur vem dos utilitários do Tailwind aplicados no componente
+     (backdrop-blur-xl / backdrop-saturate-150) — escrevê-lo aqui à
+     mão fazia o Lightning CSS descartar a versão sem prefixo. */
+  .material-bar { background: var(--veil); }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .material-bar { background: var(--shell); }
+  }
+
+  /* Barra arco-íris — o PNG do original, agora em CSS */
+  .brand-rule {
+    height: 3px;
+    background: linear-gradient(to right,
+      var(--color-brand-red) 0 11.11%,
+      var(--color-brand-orange) 11.11% 22.22%,
+      var(--color-brand-yellow) 22.22% 33.33%,
+      var(--color-brand-lime) 33.33% 44.44%,
+      var(--color-brand-green) 44.44% 55.55%,
+      var(--color-brand-teal) 55.55% 66.66%,
+      var(--color-brand-sky) 66.66% 77.77%,
+      var(--color-brand-indigo) 77.77% 88.88%,
+      var(--color-brand-magenta) 88.88% 100%);
+  }
+
+  /* Botão primário — pílula, alvo ≥44px (HIG — Accessibility) */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1.375rem;
+    border-radius: 999px;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    transition: transform 0.25s var(--ease-out-soft), opacity 0.25s, background-color 0.25s;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-fill { background: var(--fg); color: var(--shell); }
+  .btn-fill:hover { opacity: 0.85; }
+
+  .btn-ghost { color: var(--fg); border: 1px solid var(--rule); }
+  .btn-ghost:hover { background: var(--shell-2); }
+
+  /* Link em texto, estilo Apple */
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--color-brand-teal);
+    font-weight: 500;
+  }
+  .link-arrow svg { transition: transform 0.25s var(--ease-out-soft); }
+  .link-arrow:hover svg { transform: translateX(3px); }
+
+  /* Cartão elevado */
+  .card {
+    background: var(--shell);
+    border: 1px solid var(--rule);
+    border-radius: 22px;
+    overflow: hidden;
+    transition: transform 0.4s var(--ease-out-soft), box-shadow 0.4s var(--ease-out-soft);
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.24);
+  }
+
+  .stack { padding-block: clamp(4rem, 9vw, 8rem); }
+
+  /* Acento que troca de variante com o tema — ver lib/color.ts */
+  .accent { background: var(--accent); }
+  @media (prefers-color-scheme: dark) {
+    .accent { background: var(--accent-dark); }
+  }
+}
+
+@layer utilities {
+  /* Entrada suave ao aparecer no viewport.
+     Progressive enhancement: sem JS o conteúdo fica visível.
+     Só escondemos depois de a classe .js ser posta no <html>. */
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.75s var(--ease-out-soft), transform 0.75s var(--ease-out-soft);
+  }
+  .js .reveal:not([data-shown="true"]) {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  .balance { text-wrap: balance; }
+  .pretty { text-wrap: pretty; }
 }
