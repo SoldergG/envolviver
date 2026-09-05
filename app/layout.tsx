@@ -45,10 +45,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
+  // Valor de origem — o script do tema atualiza-o conforme a escolha.
+  // Media queries aqui gerariam duas metas e o script só acertaria numa.
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

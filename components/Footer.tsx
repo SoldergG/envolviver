@@ -123,8 +123,9 @@ export async function Footer() {
               <ThemeToggle />
             </div>
           </div>
-          <p className="muted text-[0.75rem] sm:text-right">
-            Por omissão segue o tema do seu sistema.
+          <p className="muted max-w-[34ch] text-[0.75rem] sm:text-right">
+            O site abre em claro. Escolha Sistema para acompanhar o seu
+            dispositivo.
           </p>
         </div>
 

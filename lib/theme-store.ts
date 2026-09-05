@@ -1,6 +1,6 @@
 "use client";
 
-import { THEME_KEY, type Theme } from "./theme";
+import { DEFAULT_THEME, THEME_KEY, type Theme } from "./theme";
 
 /**
  * Store mínimo para o tema. Existe porque ler o localStorage num
@@ -27,25 +27,31 @@ export function subscribe(onChange: () => void) {
 export function getSnapshot(): Theme {
   try {
     const v = localStorage.getItem(THEME_KEY);
-    return v === "light" || v === "dark" ? v : "system";
+    if (v === "light" || v === "dark" || v === "system") return v;
   } catch {
-    return "system";
+    /* localStorage bloqueado — fica no tema de origem */
   }
+  return DEFAULT_THEME;
 }
 
-/** No servidor não há escolha guardada: assume-se o sistema. */
+/** No servidor não há escolha guardada: vale o tema de origem. */
 export function getServerSnapshot(): Theme {
-  return "system";
+  return DEFAULT_THEME;
 }
 
 export function setTheme(next: Theme) {
-  const root = document.documentElement;
-  if (next === "system") root.removeAttribute("data-theme");
-  else root.setAttribute("data-theme", next);
+  document.documentElement.setAttribute("data-theme", next);
+
+  const dark =
+    next === "dark" ||
+    (next === "system" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", dark ? "#000000" : "#ffffff");
 
   try {
-    if (next === "system") localStorage.removeItem(THEME_KEY);
-    else localStorage.setItem(THEME_KEY, next);
+    localStorage.setItem(THEME_KEY, next);
   } catch {
     /* sem persistência, mas a escolha vale para esta sessão */
   }

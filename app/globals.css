@@ -64,13 +64,15 @@
     --fg-2: var(--color-ink-2);
     --rule: var(--color-hairline);
     --veil: rgba(255, 255, 255, 0.72);
+    color-scheme: light;
   }
 
-  /* Paleta escura, definida uma vez e aplicada em dois casos:
-     quando o sistema pede escuro e o visitante não escolheu claro,
-     e quando o visitante escolheu escuro explicitamente. */
+  /* O site abre sempre em claro, mesmo em telemóveis com o sistema
+     em escuro. O tema do sistema só entra se o visitante escolher
+     "Sistema" no rodapé — daí a media query estar presa a
+     [data-theme="system"] em vez de valer por omissão. */
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
+    :root[data-theme="system"] {
       --shell: #000000;
       --shell-2: #1d1d1f;
       --fg: #f5f5f7;
@@ -91,7 +93,6 @@
     color-scheme: dark;
   }
 
-  :root[data-theme="light"] { color-scheme: light; }
 
   html {
     scroll-behavior: smooth;
@@ -221,7 +222,7 @@
   /* Acento que troca de variante com o tema — ver lib/color.ts */
   .accent { background: var(--accent); }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .accent { background: var(--accent-dark); }
+    :root[data-theme="system"] .accent { background: var(--accent-dark); }
   }
   :root[data-theme="dark"] .accent { background: var(--accent-dark); }
 }

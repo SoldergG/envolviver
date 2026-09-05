@@ -100,16 +100,23 @@ Tailwind de propósito: à mão, o Lightning CSS descartava a versão sem prefix
 `prefers-reduced-motion`. O conteúdo está visível no HTML estático — a animação só
 liga depois de o `<script>` inline marcar `html.js`, por isso sem JS nada desaparece.
 
-**Tema escuro.** Segue o sistema por omissão (`prefers-color-scheme`), e o
-rodapé tem um seletor de três estados — Sistema, Claro, Escuro — como no macOS.
-Um interruptor de dois estados não deixaria voltar a seguir o sistema.
+**Tema.** O site **abre sempre em claro**, mesmo em dispositivos com o sistema
+em escuro. O tema do sistema é opt-in, não o comportamento de origem.
+
+O rodapé tem um seletor de três estados — Sistema, Claro, Escuro — como no
+macOS. Um interruptor de dois estados não deixaria voltar a seguir o sistema.
+
+Só duas regras conseguem escurecer a página, e ambas exigem escolha explícita:
+`@media (prefers-color-scheme: dark) { :root[data-theme="system"] }` e
+`:root[data-theme="dark"]`. Nenhuma casa com `data-theme="light"`, que é o
+que o script escreve quando não há preferência guardada — daí o claro ser
+independente do sistema operativo.
 
 A escolha fica em `localStorage` e é aplicada por um script inline no `<head>`
-antes da pintura, para não haver flash do tema errado. Os tokens estão
-definidos três vezes: `:root` (claro), a media query com
-`:not([data-theme="light"])` (o sistema, quando não há escolha manual) e
-`[data-theme="dark"]` (a escolha manual). Também se declara `color-scheme`,
-para os controlos nativos do browser acompanharem.
+antes da pintura, para não haver flash. O mesmo script acerta a
+`<meta name="theme-color">`, para a barra do browser acompanhar; por isso o
+`viewport.themeColor` é um valor único e não um par com media queries, que
+geraria duas metas e o script só acertaria numa.
 
 ## Acessibilidade
 
